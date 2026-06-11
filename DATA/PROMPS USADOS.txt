@@ -1,0 +1,17 @@
+PROMPS USADOS:
+-1
+RAW DATA"Tengo este script de Python que descarga y procesa el dataset Student Performance de UCI. Al correrlo me da FileNotFoundError buscando student-mat.csv. La estructura real de mi proyecto es:
+
+Carpetas: DATA/RAW/ (mayúsculas)
+El ZIP descargado contiene otro ZIP adentro (student.zip)
+Los CSVs quedan directamente en DATA/RAW/ al extraer
+
+Corregí el script completo con las rutas correctas.
+
+-2
+Vamos a hacer el EDA para un proyecto de ML con el dataset Student Performance de UCI. Tenemos dos modelos:
+Modelo 1 — Regresión: predecir G3 (0-20)
+Modelo 2 — Clasificación multiclase: Sin riesgo / Riesgo bajo / Riesgo medio / Riesgo alto
+
+-3
+"Dame el resumen ejecutivo del EDA en texto, con los hallazgos clave del dataset, las variables objetivo y las recomendaciones para los modelos."

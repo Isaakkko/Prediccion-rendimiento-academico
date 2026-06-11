@@ -1,0 +1,30 @@
+Variable objetivo G3 — Modelo 1 (Regresión)
+
+Media 11.34, mediana 11, escala 0-20
+Distribución aproximadamente normal con un pico anómalo en 0 — 54 estudiantes que no presentaron el examen final, no son notas reales
+Hay que decidir si filtrarlos antes de entrenar
+
+
+Variable objetivo risk_level — Modelo 2 (Clasificación)
+
+Sin riesgo: 294 (28.2%)
+Riesgo bajo: 520 (49.8%)
+Riesgo medio: 149 (14.3%)
+Riesgo alto: 81 (7.8%)
+Las clases están desbalanceadas — Riesgo bajo domina con casi el 50%
+
+
+Variables más relevantes
+
+G2 y G1 son los predictores más poderosos (correlación 0.911 y 0.809)
+failures es el factor negativo más importante (-0.383)
+higher (querer ir a la universidad) mostró la diferencia más clara entre grupos
+Medu, studytime y Fedu tienen impacto moderado positivo
+
+
+Recomendaciones para los modelos
+
+Filtrar G3=0 antes de entrenar el Modelo 1
+Usar class_weight='balanced' en el Modelo 2 por el desbalance de clases
+Aplicar OneHotEncoding a las 17 variables categóricas
+Escalar variables numéricas antes de entrenar
