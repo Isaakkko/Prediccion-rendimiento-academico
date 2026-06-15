@@ -1,0 +1,109 @@
+Documento de uso de IA en el proyecto predicción de riesgo académico 
+
+
+IA utilizada: Claude
+
+
+PROMPT USADOS: 
+-1
+RAW DATA"Tengo este script de Python que descarga y procesa el dataset Student Performance de UCI. Al correrlo me da FileNotFoundError buscando student-mat.csv. La estructura real de mi proyecto es:
+
+Carpetas: DATA/RAW/ (mayúsculas)
+El ZIP descargado contiene otro ZIP adentro (student.zip)
+Los CSVs quedan directamente en DATA/RAW/ al extraer
+
+Corregí el script completo con las rutas correctas.
+
+-2
+Vamos a hacer el EDA para un proyecto de ML con el dataset Student Performance de UCI. Tenemos dos modelos:
+Modelo 1 — Regresión: predecir G3 (0-20)
+Modelo 2 — Clasificación multiclase: Sin riesgo / Riesgo bajo / Riesgo medio / Riesgo alto
+
+-3
+"Dame el resumen ejecutivo del EDA en texto, con los hallazgos clave del dataset, las variables objetivo y las recomendaciones para los modelos."
+
+
+- 4
+"al correr el df_post.info me da este resultado 
+<class 'pandas.DataFrame'>
+RangeIndex: 1044 entries, 0 to 1043
+Data columns (total 43 columns):
+ #   Column              Non-Null Count  Dtype
+---  ------              --------------  -----
+ 0   age                 1044 non-null   int64
+ 1   Medu                1044 non-null   int64
+ 2   Fedu                1044 non-null   int64
+ 36  paid_yes            1044 non-null   bool 
+ 37  activities_yes      1044 non-null   bool 
+ 38  nursery_yes         1044 non-null   bool 
+ 39  higher_yes          1044 non-null   bool 
+ 40  internet_yes        1044 non-null   bool 
+ 41  romantic_yes        1044 non-null   bool 
+ 42  subject_portuguese  1044 non-null   bool 
+dtypes: bool(27), int64(16)
+memory usage: 158.2 KB
+evalua si esta bien para el modelo ANN de regresion usando sklearn para train test split, escalado y la creacion del modelo con keras usando ReLu como funcion de activacion"
+
+- 5
+"Necesito visualizar de forma clara las predicciones de mi modelo ANN de regresión para comparar los valores reales de G3 con los valores predichos. ¿Cómo puedo mostrar ambas columnas juntas en un DataFrame de Pandas?"
+
+
+- 6
+"Tengo que hacer un Feature Engineering ( Ingenieria de variables )
+segun mi dataset tengo unas variables que me gustaria sacar promedios 
+primero un promedio de notas con las variables G1 y G2, representan trimestre 1 y trimestre 2
+segundo tengo las variables Medu  y Fedu  son educacion de madre y padre, tambien me gustaria tener el promedio de esas variables
+tercero tengo variables dalc y walc, son variables de consumo de alcohol 
+y por ultimo la variable de absences o ausencias como tasa de ausencias"
+
+- 7
+ "Para la API
+Tengo dos modelos de ANN entrenados para predecir rendimiento académico 
+de estudiantes. Quiero crear una API REST con FastAPI que tenga un endpoint 
+por cada modelo. ¿Cómo lo hago?
+
+- Regresión: predice nota final G3, usa 46 columnas después de get_dummies 
+  y feature engineering, guardado como model1_featureengineering.keras
+- Multiclase: predice nivel de riesgo (4 clases), usa 5 variables numéricas,
+  guardado como modelo_riesgo.keras"
+
+-8 Para el feature engineering
+Tengo estas variables de entrada para un modelo de regresión ANN:
+['age', 'Medu', 'Fedu', 'traveltime', 'studytime', 'failures', 'famrel', 'freetime', 'goout', 'Dalc', 'Walc', 'health', 'absences', 'G1', 'G2', 'avg_grade', 'parent_edu_avg', 'alcohol_total', 'absence_rate', 'school_MS', 'sex_M', 'address_U', 'famsize_LE3', 'Pstatus_T', 'Mjob_health', 'Mjob_other', 'Mjob_services', 'Mjob_teacher', 'Fjob_health', 'Fjob_other', 'Fjob_services', 'Fjob_teacher', 'reason_home', 'reason_other', 'reason_reputation', 'guardian_mother', 'guardian_other', 'schoolsup_yes', 'famsup_yes', 'paid_yes', 'activities_yes', 'nursery_yes', 'higher_yes', 'internet_yes', 'romantic_yes', 'subject_portuguese']
+El modelo usa feature engineering:
+- avg_grade = (G1+G2)/2
+- parent_edu_avg = (Medu+Fedu)/2  
+- alcohol_total = Dalc+Walc
+- absence_rate = absences/max
+
+Dame una guía para poder implementarlo al modelo 
+
+-9 "Para el preprocesamiento en la API
+Mi modelo fue entrenado con get_dummies, MinMaxScaler y LabelEncoder.
+¿Cómo replico exactamente ese preprocesamiento en una API FastAPI 
+para que las predicciones sean correctas?"
+
+- 10 "Necesito ayuda para mejorar el módulo Streamlit de mi proyecto de predicción de rendimiento académico.
+
+El repositorio ya contiene la estructura del proyecto, modelos entrenados y archivos de trabajo. Quiero ajustar la interfaz para que funcione como un dashboard profesional enfocado en rendimiento académico y detección temprana de riesgo de deserción."
+
+
+
+
+// Al usar la IA para el proyecto nos sirvió con la corrección de errores exactos en las rutas del proyecto y dudas técnicas que surgieron durante el desarrollo del proyecto que con la IA logramos solventar de la mejor manera, cada prompt nos ayuda a entender el problema para conectar la practica con la teoría sin necesidad de solo copiar la solución haciendo vibe coding. 
+
+Con la IA planteamos los problemas específicos para resolver en el proyecto, sin reemplazar el razonamiento propio ya que cada prompt requiere entender el problema y la respuesta para aplicarlo de manera correcta al código sin hacer vibe coding que seria dejar que la IA haga todo a ciegas, hay que revisar cada respuesta y ajustarla a nuestro problema. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
