@@ -1,253 +1,116 @@
-"""
-API REST con FastAPI para el Sistema de Predicción de Riesgo Crediticio
-
-Endpoints:
-- GET /: Información de la API
-- POST /predict/binary: Predicción binaria (Good/Bad credit)
-- POST /predict/risk_level: Predicción de nivel de riesgo
-- GET /health: Estado del servidor
-
-Ejecutar: uvicorn main:app --reload
-Documentación: http://localhost:8000/docs
-"""
-
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
-from typing import List, Optional
+#Librerias
+from fastapi import FastAPI
+from pydantic import BaseModel
 import numpy as np
-import sys
-from pathlib import Path
+import pandas as pd
+import pickle
+from tensorflow.keras.models import load_model
 
-# TODO: Descomentar cuando los modelos estén entrenados
-# from tensorflow import keras
-# import joblib
+#Inicializar la aplicacion FatAPI
+app = FastAPI()
 
-# Añadir path del proyecto
-sys.path.append(str(Path(__file__).parent.parent))
-from src import config
+#Cargar el modelo de regresion y su scaler
+model_regresion = load_model("model1_feature.keras")
+with open("scaler_regresion.pkl", "rb") as f2:
+    scaler_regresion = pickle.load(f2)
 
-# Crear aplicación FastAPI
-app = FastAPI(
-    title="Sistema de Predicción de Riesgo Crediticio",
-    description="API para predicción de riesgo crediticio usando ANN",
-    version="1.0.0"
-)
 
-# Configurar CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+#Cargar el modelo de clasificacion multiclase, su scaler y label encoder
+model_riesgo = load_model("modelo_riesgo.keras")
+with open("scaler.pkl", "rb") as f2:
+    scaler_riesgo = pickle.load(f2)
+with open("label_encoder.pkl", "rb") as f2:
+    le = pickle.load(f2)
 
-# === MODELOS DE DATOS (SCHEMAS) ===
+with open("columnas_regresion.pkl", "rb") as f2:
+    columnas_regresion = pickle.load(f2)
 
-class CreditApplication(BaseModel):
-    """Schema para solicitud de crédito"""
-    # TODO: Ajustar según las columnas reales del dataset
-    checking_status: str = Field(..., description="Estado de cuenta corriente")
-    duration: int = Field(..., description="Duración del crédito en meses")
-    credit_history: str = Field(..., description="Historial crediticio")
-    purpose: str = Field(..., description="Propósito del crédito")
-    credit_amount: float = Field(..., description="Monto del crédito")
-    savings_status: str = Field(..., description="Estado de ahorros")
-    employment: str = Field(..., description="Situación laboral")
-    installment_rate: int = Field(..., description="Tasa de cuota")
-    personal_status: str = Field(..., description="Estado civil y género")
-    other_parties: str = Field(..., description="Otros deudores")
-    residence_since: int = Field(..., description="Residencia desde")
-    property_magnitude: str = Field(..., description="Propiedad")
-    age: int = Field(..., description="Edad")
-    other_payment_plans: str = Field(..., description="Otros planes de pago")
-    housing: str = Field(..., description="Vivienda")
-    existing_credits: int = Field(..., description="Créditos existentes")
-    job: str = Field(..., description="Tipo de trabajo")
-    num_dependents: int = Field(..., description="Número de dependientes")
-    own_telephone: str = Field(..., description="Teléfono propio")
-    foreign_worker: str = Field(..., description="Trabajador extranjero")
-    
-    class Config:
-        schema_extra = {
-            "example": {
-                "checking_status": "A11",
-                "duration": 6,
-                "credit_history": "A34",
-                "purpose": "A43",
-                "credit_amount": 1169,
-                "savings_status": "A65",
-                "employment": "A75",
-                "installment_rate": 4,
-                "personal_status": "A93",
-                "other_parties": "A101",
-                "residence_since": 4,
-                "property_magnitude": "A121",
-                "age": 67,
-                "other_payment_plans": "A143",
-                "housing": "A152",
-                "existing_credits": 2,
-                "job": "A173",
-                "num_dependents": 1,
-                "own_telephone": "A192",
-                "foreign_worker": "A201"
-            }
-        }
 
-class BinaryPredictionResponse(BaseModel):
-    """Respuesta de predicción binaria"""
-    prediction: str = Field(..., description="Good o Bad")
-    probability_bad: float = Field(..., description="Probabilidad de mal crédito")
-    probability_good: float = Field(..., description="Probabilidad de buen crédito")
-    confidence: float = Field(..., description="Confianza de la predicción")
+#Columnas esperadas para cada modelo
+columnas_regresion = ["age","Medu","Fedu","traveltime","studytime","failures","famrel","freetime","goout","Dalc","Walc","health","absences","G1","G2","avg_grade","parent_edu_avg","alcohol_total","absence_rate","school_MS","sex_M","address_U","famsize_LE3","Pstatus_T","Mjob_health","Mjob_other","Mjob_services","Mjob_teacher","Fjob_health","Fjob_other","Fjob_services","Fjob_teacher","reason_home","reason_other","reason_reputation","guardian_mother","guardian_other","schoolsup_yes","famsup_yes","paid_yes","activities_yes","nursery_yes","higher_yes","internet_yes","romantic_yes","subject_portuguese"]
+columnas_riesgo = ["G1","G2","failures","studytime","absences"]
 
-class RiskLevelResponse(BaseModel):
-    """Respuesta de nivel de riesgo"""
-    risk_level: str = Field(..., description="Bajo, Medio, Alto, Crítico")
-    probabilities: dict = Field(..., description="Probabilidades por nivel")
-    recommendation: str = Field(..., description="Recomendación")
+#Schema de entrada para la regresion
+class EstudianteGrade(BaseModel):
+    school: str
+    sex: str
+    age: int
+    address: str
+    famsize: str
+    Pstatus: str
+    Medu: int
+    Fedu: int
+    Mjob: str
+    Fjob: str
+    reason: str
+    guardian: str
+    traveltime: int
+    studytime: int
+    failures: int
+    schoolsup: str
+    famsup: str
+    paid: str
+    activities: str
+    nursery: str
+    higher: str
+    internet: str
+    romantic: str
+    famrel: int
+    freetime: int
+    goout: int
+    Dalc: int
+    Walc: int
+    health: int
+    absences: int
+    G1: int
+    G2: int
+    subject: str
 
-# === CARGAR MODELOS ===
-# TODO: Descomentar y ajustar cuando los modelos estén entrenados
+#Esquema de entrada para el modelo multiclase
+class EstudianteRiesgo(BaseModel):
+    G1: int
+    G2: int
+    failures: int
+    studytime: int
+    absences: int
 
-# binary_model = None
-# multiclass_model = None
-# scaler = None
-# encoders = None
-
-# try:
-#     binary_model = keras.models.load_model(config.BINARY_MODEL_PATH)
-#     multiclass_model = keras.models.load_model(config.MULTICLASS_MODEL_PATH)
-#     scaler = joblib.load(config.SCALER_PATH)
-#     encoders = joblib.load(config.LABEL_ENCODER_PATH)
-#     print("✓ Modelos cargados correctamente")
-# except Exception as e:
-#     print(f"⚠️ Error cargando modelos: {e}")
-#     print("Los endpoints de predicción no funcionarán hasta entrenar los modelos")
-
-# === FUNCIONES AUXILIARES ===
-
-def preprocess_input(data: CreditApplication):
-    """
-    Preprocesa los datos de entrada para el modelo
-    
-    TODO: Implementar preprocesamiento real usando scaler y encoders
-    """
-    # Convertir a dict
-    input_dict = data.dict()
-    
-    # TODO: Aplicar encoding a categóricas
-    # TODO: Aplicar scaling a numéricas
-    # TODO: Ordenar columnas según entrenamiento
-    
-    # Por ahora, retornar ejemplo dummy
-    processed = np.random.rand(1, 20)  # Ajustar dimensión
-    return processed
-
-# === ENDPOINTS ===
-
+#Endpoint raiz
 @app.get("/")
-async def root():
-    """Endpoint raíz con información de la API"""
+def root():
+    return {"mensaje": "API de prediccion academica"}
+
+#Endpoint para predecir la nota final G3
+@app.post("/predict/grade")
+def predict_grade(estudiante: EstudianteGrade):
+    #Convertir input a dataframe
+    df_input = pd.DataFrame([estudiante.dict()])
+    #Feature engineering igual al del entrenamiento
+    df_input["avg_grade"] = (df_input["G1"] + df_input["G2"]) / 2
+    df_input["parent_edu_avg"] = (df_input["Medu"] + df_input["Fedu"]) / 2
+    df_input["alcohol_total"] = df_input["Dalc"] + df_input["Walc"]
+    df_input["absence_rate"] = df_input["absences"] / df_input["absences"].max()
+    #Encodear las variables categoricas
+    df_input = pd.get_dummies(df_input, drop_first=True)
+    #Alinear las columnas con las del entrenamiento
+    df_input = df_input.reindex(columns=columnas_regresion, fill_value=0)
+    bool_cols = df_input.select_dtypes(include="bool").columns
+    #Escalar y predecir
+    df_input[bool_cols] = df_input[bool_cols].astype(int)
+    X_scaled = scaler_regresion.transform(df_input)
+    pred = model_regresion.predict(X_scaled)
+    return {"G3_predicho": round(float(pred[0][0]), 2)}
+
+#Endpoint para predecir el nivel de riesgo
+@app.post("/predict/risk_level")
+def predict_risk_level(estudiante: EstudianteRiesgo):
+    #Convertir input a dataframe
+    df_input = pd.DataFrame([estudiante.dict()])
+    #Escalar y predecir
+    X_scaled = scaler_riesgo.transform(df_input)
+    prob = model_riesgo.predict(X_scaled)
+    #Obtener la clase con mayor probabilidad
+    clase = le.inverse_transform(np.argmax(prob, axis=1))[0]
     return {
-        "message": "API de Predicción de Riesgo Crediticio",
-        "version": "1.0.0",
-        "endpoints": {
-            "/docs": "Documentación interactiva",
-            "/predict/binary": "Predicción binaria (Good/Bad)",
-            "/predict/risk_level": "Predicción de nivel de riesgo",
-            "/health": "Estado del servidor"
-        }
+        "prediccion": clase,
+        "probabilidades": dict(zip(le.classes_, prob[0].round(4).tolist()))
     }
-
-@app.get("/health")
-async def health_check():
-    """Verifica el estado del servidor y modelos"""
-    # TODO: Verificar si los modelos están cargados
-    models_loaded = False  # Cambiar cuando se carguen los modelos
-    
-    return {
-        "status": "healthy" if models_loaded else "models_not_loaded",
-        "binary_model": models_loaded,
-        "multiclass_model": models_loaded,
-        "message": "API funcionando correctamente" if models_loaded else "Entrenar modelos primero"
-    }
-
-@app.post("/predict/binary", response_model=BinaryPredictionResponse)
-async def predict_binary(application: CreditApplication):
-    """
-    Predice si el crédito será bueno o malo
-    
-    Returns:
-        Predicción binaria con probabilidades
-    """
-    # TODO: Descomentar cuando los modelos estén listos
-    # if binary_model is None:
-    #     raise HTTPException(status_code=503, detail="Modelo no disponible. Entrenar primero.")
-    
-    try:
-        # Preprocesar
-        # X = preprocess_input(application)
-        
-        # Predecir
-        # proba = binary_model.predict(X)[0][0]
-        
-        # Respuesta dummy (eliminar cuando el modelo esté listo)
-        proba = np.random.random()
-        
-        prediction = "Bad" if proba > 0.5 else "Good"
-        confidence = max(proba, 1 - proba)
-        
-        return BinaryPredictionResponse(
-            prediction=prediction,
-            probability_bad=float(proba),
-            probability_good=float(1 - proba),
-            confidence=float(confidence)
-        )
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error en predicción: {str(e)}")
-
-@app.post("/predict/risk_level", response_model=RiskLevelResponse)
-async def predict_risk_level(application: CreditApplication):
-    """
-    Predice el nivel de riesgo crediticio
-    
-    Returns:
-        Nivel de riesgo y probabilidades
-    """
-    # TODO: Implementar predicción real
-    
-    try:
-        # Respuesta dummy (eliminar cuando el modelo esté listo)
-        probas = np.random.dirichlet(np.ones(4))
-        risk_idx = np.argmax(probas)
-        risk_level = config.RISK_LEVELS[risk_idx]
-        
-        # Generar recomendación
-        recommendations = {
-            "Bajo": "Crédito aprobado con condiciones estándar",
-            "Medio": "Crédito aprobado con seguimiento",
-            "Alto": "Requiere garantías adicionales",
-            "Crítico": "No recomendado aprobar"
-        }
-        
-        return RiskLevelResponse(
-            risk_level=risk_level,
-            probabilities={
-                level: float(prob) 
-                for level, prob in zip(config.RISK_LEVELS, probas)
-            },
-            recommendation=recommendations[risk_level]
-        )
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error en predicción: {str(e)}")
-
-# === EJECUTAR ===
-if __name__ == "__main__":
-    import uvicorn
-    print("Iniciando servidor FastAPI...")
-    print("Documentación: http://localhost:8000/docs")
-    uvicorn.run(app, host=config.API_HOST, port=config.API_PORT, reload=config.API_RELOAD)
