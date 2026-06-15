@@ -53,7 +53,7 @@ http://127.0.0.1:5000/predict
 {
   "rendimiento_predicho": 74.5,
   "puntaje_riesgo": 25.5,
-  "riesgo_desercion": "Bajo",
+  "riesgo_desercion": "Riesgo bajo",
   "alerta_temprana": "Sin alerta crítica",
   "recomendaciones": [
     "Mantener seguimiento preventivo mensual",
@@ -61,6 +61,14 @@ http://127.0.0.1:5000/predict
   ]
 }
 ```
+
+Los valores válidos para `riesgo_desercion` son:
+
+| Valor | Significado |
+|---|---|
+| `"Riesgo alto"` | Intervención urgente |
+| `"Riesgo medio"` | Seguimiento preventivo |
+| `"Riesgo bajo"` | Sin alerta crítica |
 
 También acepta respuestas con nombres alternativos como `prediction`, `prediccion`, `risk_score`, `risk_level`, `probability` o `recommendations`.
 

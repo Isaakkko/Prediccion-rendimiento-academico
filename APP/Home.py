@@ -109,7 +109,7 @@ def create_demo_data(n: int = 120) -> pd.DataFrame:
     riesgo = pd.cut(
         score,
         bins=[-1, 55, 72, 100],
-        labels=["Alto", "Medio", "Bajo"],
+        labels=["Sin riesgo", "Riesgo bajo", "Riesgo medio", "Riesgo alto"],
     ).astype(str)
 
     return pd.DataFrame(
