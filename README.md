@@ -1,135 +1,293 @@
-# 🎓 Predicción de Rendimiento Académico
-**Proyecto — Análisis y Modelo Predictivo**  
+# Predicción de Rendimiento Académico
+
+Proyecto de análisis de datos e inteligencia artificial orientado a la predicción del rendimiento académico y la identificación temprana de estudiantes en riesgo.
+
 **Colegio Universitario de Cartago — Costa Rica**
 
-**Integrantes:**
+## Integrantes
+
 - Isaac Ulloa Calvo
 - Jeffrey Jiménez Cordero
 - Felipe Montenegro Artavia
 
----
+## Descripción
 
-## 📌 Descripción General
+El proyecto analiza información académica, familiar y de comportamiento de estudiantes para identificar patrones relacionados con su desempeño.
 
-Este proyecto desarrolla un sistema de análisis y predicción del rendimiento académico de estudiantes.  
-Incluye:
+A partir de los datos se desarrollaron modelos de redes neuronales artificiales capaces de:
 
-- Análisis exploratorio de datos (EDA)
-- Visualizaciones interactivas mediante una aplicación web
-- API REST para consumo del modelo predictivo
-- Modelos supervisados de clasificación y redes neuronales para predecir el desempeño estudiantil
+- Estimar la calificación final del estudiante (`G3`) mediante un modelo de regresión.
+- Clasificar el nivel de riesgo académico mediante un modelo multiclase.
+- Analizar los factores que presentan mayor relación con el rendimiento.
+- Apoyar la detección temprana de posibles dificultades académicas.
 
-El objetivo es identificar los factores que influyen en el rendimiento académico y construir un modelo capaz de estimar la probabilidad de éxito o riesgo de un estudiante según sus características.
+El sistema integra análisis exploratorio de datos, preprocesamiento, ingeniería de características, entrenamiento de modelos, una API REST desarrollada con FastAPI y una aplicación web construida con Streamlit.
 
----
+## Fuente de datos
 
-## 📁 Fuente de Datos
+El proyecto utiliza datos de rendimiento estudiantil correspondientes a las asignaturas de Matemáticas y Portugués.
 
-### 🗂 Dataset Principal
-Datos históricos de estudiantes con variables académicas, socioeconómicas y de comportamiento.
+Los datos contienen variables académicas, demográficas, familiares y de hábitos de estudio. Entre las variables analizadas se encuentran:
 
-Variables incluidas:
-- Calificaciones previas
-- Asistencia
-- Factores socioeconómicos
-- Variables de comportamiento y hábitos de estudio
+- `G1`: calificación del primer periodo.
+- `G2`: calificación del segundo periodo.
+- `G3`: calificación final.
+- `studytime`: tiempo de estudio.
+- `failures`: cantidad de asignaturas reprobadas.
+- `absences`: ausencias.
+- `Medu` y `Fedu`: nivel educativo de los padres.
+- `Dalc` y `Walc`: consumo de alcohol entre semana y fines de semana.
+- `higher`: intención de continuar estudios superiores.
+- `famrel`: calidad de las relaciones familiares.
 
----
+Los archivos originales se almacenan en `DATA/RAW` y los datos preparados para análisis y modelado se encuentran en `DATA/PROCESSED`.
 
-## 🧪 Análisis Exploratorio y Visualización (EDA)
+## Análisis exploratorio de datos
 
-El análisis incluye:
+El análisis exploratorio se desarrolla en `NOTEBOOKS/01_EDA.ipynb`.
 
-### ✔ Distribución y frecuencia
-- Distribución de calificaciones por grupo
-- Frecuencia de variables categóricas
+El EDA incluye:
 
-### ✔ Correlaciones y mapas de calor
-- Variables académicas vs rendimiento
-- Factores externos vs desempeño
+- Revisión de estructura y tipos de datos.
+- Análisis de valores faltantes.
+- Distribución de variables.
+- Análisis de calificaciones.
+- Matrices de correlación.
+- Comparación de variables académicas y de comportamiento.
+- Identificación de factores relacionados con el rendimiento académico.
 
-### ✔ Resultados clave
-- Identificación de variables con mayor impacto
-- Comparación entre perfiles de estudiantes en riesgo y sin riesgo
+Las calificaciones previas `G1` y `G2` representan variables especialmente relevantes para la estimación de la calificación final.
 
----
+## Ingeniería de características
 
-## 🤖 Modelo Predictivo
+Para ampliar la información disponible para el modelo de regresión se crearon nuevas variables:
 
-### 🎯 Tipo de problema
-**Clasificación** — Predecir el rendimiento académico del estudiante.
+- `avg_grade`: promedio de `G1` y `G2`.
+- `parent_edu_avg`: promedio del nivel educativo de la madre y el padre.
+- `alcohol_total`: combinación de `Dalc` y `Walc`.
+- `absence_rate`: proporción normalizada de ausencias.
 
-### 🔢 Algoritmos utilizados
-- Redes Neuronales (TensorFlow / Keras)
-- Modelos de clasificación con scikit-learn
+Estas variables permiten representar de forma más compacta patrones académicos, familiares y de comportamiento.
 
-### 🧩 Variables de entrada
-- Calificaciones anteriores
-- Asistencia
-- Variables socioeconómicas
-- Hábitos de estudio
+## Modelos predictivos
 
-### 🎯 Variable objetivo
-- **Rendimiento** (Alto / Medio / Bajo o clasificación binaria)
+### Modelo de regresión
 
----
+El modelo de regresión tiene como objetivo estimar la calificación final `G3`.
 
-## 🌐 API REST
+El desarrollo y evaluación se documentan principalmente en:
 
-El proyecto expone una API construida con **FastAPI** y **Uvicorn** que permite:
+- `NOTEBOOKS/03_ANN_Modelo1.ipynb`
+- `NOTEBOOKS/03_ANN_Modelo1_FeatureEngineering.ipynb`
+- `NOTEBOOKS/05_Comparacion_Modelos.ipynb`
 
-- Recibir datos de un estudiante vía JSON
-- Retornar la predicción del modelo en tiempo real
-- Integrarse con la aplicación web (APP)
+El modelo utiliza TensorFlow y Keras para construir una red neuronal artificial.
 
----
+### Modelo de clasificación multiclase
 
-## 📱 Aplicación Web
+El segundo modelo clasifica el nivel de riesgo académico del estudiante.
 
-Se desarrolló una interfaz web interactiva con **Streamlit** que permite:
+Su desarrollo se encuentra en:
 
-- Ingresar los datos del estudiante
-- Visualizar la predicción de rendimiento
-- Explorar los resultados del análisis EDA
+- `NOTEBOOKS/Modelo_Multiclase2.ipynb`
+- `NOTEBOOKS/Modelo_Multiclase_Engineering.ipynb`
 
----
----
+Para la inferencia de riesgo se utilizan variables académicas como:
 
-## ⚙️ Requerimientos Técnicos
+- `G1`
+- `G2`
+- `failures`
+- `studytime`
+- `absences`
 
-### 🐍 Python 3.10+
+Los modelos y objetos de preprocesamiento entrenados se almacenan en `MODELS`.
 
-### 📚 Librerías principales:
-- tensorflow / keras
-- scikit-learn
+## API REST
+
+La carpeta `API` contiene una API desarrollada con FastAPI para exponer los modelos predictivos mediante solicitudes HTTP.
+
+### Endpoint raíz
+
+`GET /`
+
+Permite verificar que la API se encuentra disponible.
+
+### Predicción de calificación final
+
+`POST /predict/grade`
+
+Recibe las características de un estudiante y retorna la estimación de `G3`.
+
+Ejemplo de respuesta:
+
+```json
+{
+  "G3_predicho": 13.42
+}
+```
+
+### Predicción del nivel de riesgo
+
+`POST /predict/risk_level`
+
+Recibe las variables principales del modelo multiclase.
+
+Ejemplo de entrada:
+
+```json
+{
+  "G1": 10,
+  "G2": 9,
+  "failures": 1,
+  "studytime": 2,
+  "absences": 6
+}
+```
+
+La respuesta contiene la clase predicha y las probabilidades calculadas para cada nivel.
+
+## Aplicación web
+
+La carpeta `APP` contiene una aplicación desarrollada con Streamlit.
+
+La interfaz incluye:
+
+- Dashboard de indicadores académicos.
+- Visualización de estudiantes por nivel de riesgo.
+- Alertas tempranas.
+- Predicción individual.
+- Recomendaciones de intervención.
+- Exportación de reportes en formato CSV.
+- Lectura de archivos desde `DATA/PROCESSED` y `DATA/RAW`.
+
+La aplicación también dispone de lógica de respaldo basada en reglas cuando el servicio de predicción no se encuentra disponible.
+
+## Estructura del proyecto
+
+```text
+Prediccion-rendimiento-academico/
+│
+├── API/
+│   ├── main.py
+│   ├── predict.py
+│   └── schemas.py
+│
+├── APP/
+│   ├── .streamlit/
+│   ├── Home.py
+│   ├── README_API_STREAMLIT.md
+│   ├── README_STREAMLIT.md
+│   └── requirements.txt
+│
+├── DATA/
+│   ├── RAW/
+│   ├── PROCESSED/
+│   └── DATA.ipynb
+│
+├── MODELS/
+│   ├── model1.h5
+│   ├── model1_featureengineering.h5
+│   ├── modelo_riesgo.keras
+│   ├── modelo_riesgo_engineering.keras
+│   ├── scaler.pkl
+│   ├── scaler_fe.pkl
+│   ├── label_encoder.pkl
+│   └── label_encoder_fe.pkl
+│
+├── NOTEBOOKS/
+│   ├── 01_EDA.ipynb
+│   ├── 03_ANN_Modelo1.ipynb
+│   ├── 03_ANN_Modelo1_FeatureEngineering.ipynb
+│   ├── 05_Comparacion_Modelos.ipynb
+│   ├── Modelo_Multiclase2.ipynb
+│   └── Modelo_Multiclase_Engineering.ipynb
+│
+├── SRC/
+│   └── TRAIN/
+│       ├── config.py
+│       └── data_prep.py
+│
+├── README.md
+└── REQUIREMENTS.txt
+```
+
+## Tecnologías utilizadas
+
+- Python
+- TensorFlow
+- Keras
 - pandas
-- numpy
-- matplotlib
-- seaborn
-- streamlit
-- fastapi
-- uvicorn
-- requests
+- NumPy
+- scikit-learn
+- Matplotlib
+- Seaborn
+- Plotly
+- FastAPI
+- Uvicorn
+- Streamlit
+- Jupyter Notebook
 
----
+## Instalación
 
-## 📈 Resultados Esperados
+Se recomienda utilizar Python 3.11.
 
-- Identificación de las variables con mayor influencia en el rendimiento
-- Perfil de estudiantes en riesgo académico
-- Predicción del desempeño mediante redes neuronales
-- API funcional para consumo del modelo
-- Interfaz web para visualización e inferencia en tiempo real
+Clonar el repositorio:
 
----
+```bash
+git clone https://github.com/Isaakkko/Prediccion-rendimiento-academico.git
+cd Prediccion-rendimiento-academico
+```
 
-## 🧾 Conclusiones
+Crear el entorno virtual:
 
-- Las variables académicas previas son los predictores más fuertes del rendimiento futuro.
-- Los modelos de redes neuronales ofrecen mayor capacidad para capturar patrones complejos.
-- La combinación de una API REST con una interfaz Streamlit facilita el acceso al modelo de forma práctica.
-- El análisis exploratorio revela patrones claros que distinguen a estudiantes en riesgo.
+```bash
+python -m venv .venv
+```
 
----
+Activar el entorno en PowerShell:
 
-# Fin
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Instalar las dependencias:
+
+```bash
+python -m pip install -r REQUIREMENTS.txt
+```
+
+## Ejecución de la aplicación Streamlit
+
+Desde la raíz del repositorio:
+
+```bash
+python -m streamlit run APP/Home.py
+```
+
+La aplicación estará disponible normalmente en:
+
+`http://localhost:8501`
+
+## Ejecución de la API
+
+Antes de ejecutar la API, los archivos de modelo y preprocesamiento requeridos por `API/main.py` deben estar disponibles en las rutas configuradas.
+
+Desde la raíz del repositorio:
+
+```bash
+python -m uvicorn API.main:app --reload
+```
+
+La documentación interactiva de FastAPI estará disponible normalmente en:
+
+`http://127.0.0.1:8000/docs`
+
+## Objetivo del proyecto
+
+El objetivo del proyecto es demostrar la aplicación de técnicas de inteligencia artificial y redes neuronales artificiales en el análisis del rendimiento académico.
+
+La solución busca apoyar la identificación temprana de estudiantes con posibles dificultades, facilitando el análisis de factores de riesgo y la generación de información útil para estrategias de acompañamiento académico.
+
+## Uso académico
+
+Proyecto desarrollado con fines académicos. Las predicciones generadas por los modelos deben interpretarse como una herramienta de apoyo al análisis y no como un criterio único para la toma de decisiones sobre un estudiante.
